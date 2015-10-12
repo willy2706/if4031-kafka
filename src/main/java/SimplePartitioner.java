@@ -4,6 +4,9 @@ import kafka.producer.Partitioner;
  * Created by nim_13512065 on 10/1/15.
  */
 public class SimplePartitioner implements Partitioner {
+    public SimplePartitioner() {
+
+    }
     @Override
     public int partition(Object o, int i) {
         int partition = 0;
