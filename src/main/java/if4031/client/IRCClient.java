@@ -5,9 +5,10 @@ import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.TimeoutException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 public class IRCClient {
 
@@ -17,11 +18,12 @@ public class IRCClient {
     private String nickname;
     private Set<String> joinedChannel = new HashSet<String>();
 
-    public IRCClient(String server, int port) throws IOException, TimeoutException {
+    public IRCClient(String server, int port) {
         Properties props = new Properties();
-        props.put("metadata.broker.list", "localhost:9092");
+        props.put("metadata.broker.list", server + ":" + port);
         props.put("serializer.class", "kafka.serializer.StringEncoder");
-        props.put("request.required.acks", "1");
+        // props.put("request.required.acks", "1"); kenapa ini di set 1? gapapa kok kalau message ga durable.
+
         producerConfig = new ProducerConfig(props);
         nickname = new RandomString().randomString(16);
     }
@@ -29,7 +31,7 @@ public class IRCClient {
     void start() {
     }
 
-    void stop() throws IOException {
+    void stop() {
     }
 
     /**
@@ -45,7 +47,7 @@ public class IRCClient {
     /**
      * Get messages from our queue in rabbitMQ.
      * Notify listener for the new messages.
-     * //TODO
+     * TODO
      */
     public List<Message> getMessages() {
         return null;
@@ -53,32 +55,33 @@ public class IRCClient {
 
     /**
      * Join a channel.
-     * Equivalent to binding to our queue to an exchange in rabbitgMQ.
-     * kafka menyediakan fitur untuk langsung buat topic dengan default tertentu
+     * Maybe no binding is required because the way kafka works.
+     * Instead Attempt to consume all joined channels in getMessages.
+     *
      * @param channelName channel to join
      */
-    public void joinChannel(String channelName) throws IOException {
+    public void joinChannel(String channelName) {
         this.joinedChannel.add(channelName);
     }
 
     /**
      * Leave a channel.
-     * Equivalent to unbinding our queue from an exchange in rabbitMQ.
+     * Maybe no binding is required because the way kafka works.
+     * Instead Attempt to consume all joined channels in getMessages.
      *
      * @param channelName channel to leave.
      */
-    public void leaveChannel(String channelName) throws IOException {
+    public void leaveChannel(String channelName) {
         this.joinedChannel.remove(channelName);
     }
 
     /**
      * Send Message to all joined channels.
-     * Equivalent to sending messages to many exchanges in rabbitMQ.
      * joined channel is maintained in client.
      *
      * @param message message
      */
-    public void sendMessageAll(String message) throws IOException {
+    public void sendMessageAll(String message) {
         String sent = "(" + nickname + "): " + message;
         Producer<String, String> producer = new Producer<String, String>(producerConfig);
         for (String mychannel : joinedChannel) {
@@ -90,14 +93,13 @@ public class IRCClient {
 
     /**
      * Send Message to a specific joined channel.
-     * Equivalent to sending message to an exchange in rabbitMQ.
      * must check first whether we have joined the channel or not.
      * joined channel is maintained in client.
      *
      * @param channelName channel name
      * @param message     message
      */
-    public void sendMessageChannel(String channelName, String message) throws IOException {
+    public void sendMessageChannel(String channelName, String message) {
         if (joinedChannel.contains(channelName)) {
             String sent = "(" + nickname + "): " + message;
             Producer<String, String> producer = new Producer<String, String>(producerConfig);

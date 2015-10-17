@@ -62,41 +62,24 @@ public class CLInterface {
         } else if (command instanceof JoinChannelCommand) {
             JoinChannelCommand cmd = (JoinChannelCommand) command;
             String channelName = cmd.getChannelName();
-            try {
-                ircClient.joinChannel(channelName);
-                out.println("Joined channel: " + channelName);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            ircClient.joinChannel(channelName);
+            out.println("Joined channel: " + channelName);
 
         } else if (command instanceof LeaveChannelCommand) {
             LeaveChannelCommand cmd = (LeaveChannelCommand) command;
             String channelName = cmd.getChannelName();
-            try {
-                ircClient.leaveChannel(channelName);
-                out.println("Left channel: " + channelName);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            ircClient.leaveChannel(channelName);
+            out.println("Left channel: " + channelName);
 
         } else if (command instanceof SendMessageAll) {
             SendMessageAll cmd = (SendMessageAll) command;
-            try {
-                ircClient.sendMessageAll(cmd.getMessage());
-                out.println("Message sent");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            ircClient.sendMessageAll(cmd.getMessage());
+            out.println("Message sent");
 
         } else if (command instanceof SendMessageChannel) {
             SendMessageChannel cmd = (SendMessageChannel) command;
-            try {
-                ircClient.sendMessageChannel(cmd.getChannelName(), cmd.getMessage());
-                out.println("Message sent");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            ircClient.sendMessageChannel(cmd.getChannelName(), cmd.getMessage());
+            out.println("Message sent");
 
         } else {
             // never happen
