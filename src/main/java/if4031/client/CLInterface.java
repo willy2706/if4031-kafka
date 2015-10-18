@@ -2,7 +2,6 @@ package if4031.client;
 
 import if4031.client.command.*;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Scanner;
@@ -36,7 +35,6 @@ public class CLInterface {
         // main loop
         String commandString;
         while (true) {
-            printMessages();
             out.print(COMMAND_PROMPT);
             commandString = scanner.nextLine();
             CommandParser.ParseResult parseResult = commandParser.parse(commandString);
@@ -49,6 +47,8 @@ public class CLInterface {
             } else if (status == CommandParser.ParseStatus.EXIT) {
                 break;
             }
+
+            printMessages();
         }
     }
 
@@ -68,8 +68,13 @@ public class CLInterface {
         } else if (command instanceof LeaveChannelCommand) {
             LeaveChannelCommand cmd = (LeaveChannelCommand) command;
             String channelName = cmd.getChannelName();
-            ircClient.leaveChannel(channelName);
-            out.println("Left channel: " + channelName);
+            try {
+                ircClient.leaveChannel(channelName);
+                out.println("Left channel: " + channelName);
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
         } else if (command instanceof SendMessageAll) {
             SendMessageAll cmd = (SendMessageAll) command;

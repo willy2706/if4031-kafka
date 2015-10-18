@@ -1,7 +1,7 @@
 import kafka.producer.Partitioner;
 
 /**
- * Created by nim_13512065 on 10/1/15.
+ * TODO mark for deletion
  */
 public class SimplePartitioner implements Partitioner {
     @Override

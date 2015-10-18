@@ -5,33 +5,35 @@ import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 public class IRCClient {
 
-    private final Object messageQueueLock = new Object();
-    private final ProducerConfig producerConfig;
+    private final ChannelManager channelManager;
+    private final Producer<String, String> producer;
 
     private String nickname;
-    private Set<String> joinedChannel = new HashSet<String>();
 
-    public IRCClient(String server, int port) {
+    public IRCClient(String brokerAddress, String zookeeperAddress) {
         Properties props = new Properties();
-        props.put("metadata.broker.list", server + ":" + port);
+        props.put("metadata.broker.list", brokerAddress);
         props.put("serializer.class", "kafka.serializer.StringEncoder");
-        // props.put("request.required.acks", "1"); kenapa ini di set 1? gapapa kok kalau message ga durable.
+        ProducerConfig producerConfig = new ProducerConfig(props);
+        producer = new Producer<>(producerConfig);
 
-        producerConfig = new ProducerConfig(props);
-        nickname = new RandomString().randomString(16);
+        RandomString randomString = new RandomString();
+        nickname = randomString.randomString(16);
+
+        channelManager = new ChannelManager(zookeeperAddress, nickname);
     }
 
-    void start() {
+    public void start() {
     }
 
-    void stop() {
+    public void stop() throws InterruptedException {
+        producer.close();
+        channelManager.destroy();
     }
 
     /**
@@ -45,12 +47,10 @@ public class IRCClient {
     }
 
     /**
-     * Get messages from our queue in rabbitMQ.
-     * Notify listener for the new messages.
-     * TODO
+     * Get messages from our messages queue.
      */
     public List<Message> getMessages() {
-        return null;
+        return channelManager.getMessages();
     }
 
     /**
@@ -61,7 +61,7 @@ public class IRCClient {
      * @param channelName channel to join
      */
     public void joinChannel(String channelName) {
-        this.joinedChannel.add(channelName);
+        channelManager.join(channelName);
     }
 
     /**
@@ -71,8 +71,8 @@ public class IRCClient {
      *
      * @param channelName channel to leave.
      */
-    public void leaveChannel(String channelName) {
-        this.joinedChannel.remove(channelName);
+    public void leaveChannel(String channelName) throws InterruptedException {
+        channelManager.leave(channelName);
     }
 
     /**
@@ -82,13 +82,11 @@ public class IRCClient {
      * @param message message
      */
     public void sendMessageAll(String message) {
-        String sent = "(" + nickname + "): " + message;
-        Producer<String, String> producer = new Producer<String, String>(producerConfig);
-        for (String mychannel : joinedChannel) {
-            KeyedMessage<String, String> data = new KeyedMessage<String, String>(mychannel, sent);
+        String sent = getSendString(message);
+        for (String mychannel : channelManager.getChannelNames()) {
+            KeyedMessage<String, String> data = new KeyedMessage<>(mychannel, sent);
             producer.send(data);
         }
-        producer.close();
     }
 
     /**
@@ -100,12 +98,14 @@ public class IRCClient {
      * @param message     message
      */
     public void sendMessageChannel(String channelName, String message) {
-        if (joinedChannel.contains(channelName)) {
-            String sent = "(" + nickname + "): " + message;
-            Producer<String, String> producer = new Producer<String, String>(producerConfig);
-            KeyedMessage<String, String> data = new KeyedMessage<String, String>(channelName, sent);
+        if (channelManager.containsChannel(channelName)) {
+            String sent = getSendString(message);
+            KeyedMessage<String, String> data = new KeyedMessage<>(channelName, sent);
             producer.send(data);
-            producer.close();
         }
+    }
+
+    private String getSendString(String message) {
+        return "(" + nickname + "): " + message;
     }
 }

@@ -1,7 +1,7 @@
 package if4031.client.exception;
 
 /**
- * Created by nim_13512065 on 9/17/15.
+ * TODO mark for deletion
  */
 public class ChannelException extends Exception {
     public ChannelException(String string) {

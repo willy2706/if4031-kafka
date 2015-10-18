@@ -3,7 +3,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 /**
- * Created by nim_13512065 on 9/30/15.
+ * TODO mark for deletion
  */
 
 public class Main {

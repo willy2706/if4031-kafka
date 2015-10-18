@@ -1,7 +1,5 @@
 package if4031.client.command;
 
-import if4031.client.IRCClient;
-
 public class SendMessageAll implements Command {
     private final String message;
 

@@ -1,7 +1,5 @@
 package if4031.client.command;
 
-import if4031.client.IRCClient;
-
 /**
  * Command to send a message to a specific channel.
  */

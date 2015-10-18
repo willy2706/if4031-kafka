@@ -11,18 +11,18 @@ public class ClientProgram {
 
     private static final String PROPERTY_FILE = "/client.properties";
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         ClientConfiguration configuration = new PropertyConfiguration(PROPERTY_FILE); // throws IOException
-        String serverAddress = configuration.getString("serverAddress");
-        int serverPort = configuration.getInt("serverPort");
+        String brokerAddress = configuration.getString("brokerAddress");
+        String zookeeperAddress = configuration.getString("zookeeperAddress");
+        IRCClient ircClient = new IRCClient(brokerAddress, zookeeperAddress);
 
-        IRCClient ircClient = new IRCClient(serverAddress, serverPort);
         Scanner scanner = new Scanner(System.in);
         CLInterface clInterface = new CLInterface(scanner, System.out, ircClient);
 
         ircClient.start();
         clInterface.run();
 
-        ircClient.stop();
+        ircClient.stop(); // throws IOException
     }
 }

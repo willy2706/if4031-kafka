@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Belum bisa jalan yang ini
+ * TODO mark for deletion
  */
 public class SimpleExample {
     public static void main(String[] args) {

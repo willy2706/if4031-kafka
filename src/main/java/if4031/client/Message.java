@@ -4,7 +4,7 @@ public class Message {
     private String channel;
     private String body;
 
-    Message(String _channel, String _body) {
+    public Message(String _channel, String _body) {
         setChannel(_channel);
         setBody(_body);
     }
