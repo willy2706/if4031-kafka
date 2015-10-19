@@ -25,7 +25,7 @@ public class ChannelManager {
      * @param groupID          consumer group ID
      */
     public ChannelManager(String zookeeperAddress, String groupID) {
-        System.out.println("groupID: " + groupID);
+//        System.out.println("groupID: " + groupID);
         Properties props = new Properties();
         props.put("zookeeper.connect", zookeeperAddress);
         props.put("group.id", groupID);
